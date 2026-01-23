@@ -1,34 +1,38 @@
+# 1. Usar a imagem oficial do PHP com FPM
 FROM php:8.2-fpm
 
-# 1. Instalar dependências do sistema e extensões para PostgreSQL
+# 2. Instalar dependências do sistema e extensões do PHP para PostgreSQL
+# O libpq-dev é essencial para o driver pdo_pgsql
 RUN apt-get update && apt-get install -y \
+    libpq-dev \
     git \
     unzip \
-    libpq-dev \
+    zip \
     && docker-php-ext-install pdo pdo_pgsql
 
-# 2. Instalar o Composer (Copiando o binário oficial)
+# 3. Instalar o Composer (copiando o binário oficial da versão 2)
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# 3. Definir o diretório de trabalho
+# 4. Definir diretório de trabalho dentro do container
 WORKDIR /var/www
 
-# 4. Copiar primeiro os ficheiros de dependências
-# Isso ajuda o Railway a fazer o build mais rápido (cache)
+# 5. Copiar os arquivos de dependências primeiro (otimiza o cache do Docker)
 COPY composer.json composer.lock ./
 
-# 5. Instalar as dependências ANTES de copiar o resto do código
-# Usamos o caminho completo /usr/bin/composer para não haver erro
+# 6. Instalar dependências do PHP sem pacotes de desenvolvimento
 RUN /usr/bin/composer install --no-dev --optimize-autoloader --no-scripts
 
-# 6. Copiar o restante do projeto
+# 7. Copiar todo o resto do código do projeto para o container
 COPY . .
 
-# 7. Ajustar permissões para o Laravel
+# 8. Dar permissões de escrita para as pastas que o Laravel precisa
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Porta do Railway
+# 9. Expor a porta que o Railway utiliza por padrão
 EXPOSE 8080
 
-# Comando para iniciar
-CMD php artisan serve --host=0.0.0.0 --port=8080
+# 10. Comando de Inicialização:
+# - Roda as migrações (cria as tabelas no Postgres)
+# - Inicia o servidor do Laravel na porta 8080
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
