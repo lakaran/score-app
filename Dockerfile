@@ -25,6 +25,9 @@ RUN /usr/bin/composer install --no-dev --optimize-autoloader --no-scripts
 # 7. Copiar todo o resto do código do projeto para o container
 COPY . .
 
+# Instalar dependências
+RUN composer install --no-dev --optimize-autoloader
+
 # 8. Dar permissões de escrita para as pastas que o Laravel precisa
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
