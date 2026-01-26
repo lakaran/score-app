@@ -1,42 +1,39 @@
-FROM php:8.2-fpm
+FROM php:8.2-cli
 
-# Instalar dependências de sistema e o driver do Postgres
+# Dependências do sistema
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    git \
-    curl \
-    unzip \
-    zip \
-    libpng-dev \
-    liboning-dev \
-    libxml2-dev \
-    libzip-dev \
-    libsodium-dev \
-    defoult-postgres-client \
-    ddefoult-libmysqlclient-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install pdo pdo_pgsql
+    git unzip zip sqlite3 libsqlite3-dev libzip-dev \
+    && docker-php-ext-install pdo pdo_sqlite zip
 
 # Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN curl -sl https://deb.nodesource.com/setup_18.x | bash && \ apt-get update && apt-get install -y nodejs
+WORKDIR /app
 
-WORKDIR /var/www/htlm
+# Copiar projeto
 COPY . .
 
-# Instalar dependências do projeto
+# Instalar dependências PHP
 RUN composer install --no-dev --optimize-autoloader
-RUN npm install
 
-# Ajustar permissões (Crucial para o erro 502/500)
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Criar base de dados SQLite
+RUN mkdir -p /data && touch /data/database.sqlite
+
+# Permissões
+RUN chown -R www-data:www-data /data storage bootstrap/cache
+
+# Variáveis de ambiente
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV DB_CONNECTION=sqlite
+ENV DB_DATABASE=/data/database.sqlite
+ENV CACHE_DRIVER=file
+ENV SESSION_DRIVER=file
+ENV LOG_CHANNEL=stderr
 
 EXPOSE 8080
 
-# Comando para ligar
-#CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
+# 🚀 Comando que mantém o container vivo
+CMD php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=${PORT}
 
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
