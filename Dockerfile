@@ -1,6 +1,6 @@
 FROM php:8.2-cli
 
-# System deps
+# Dependências do sistema
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -8,37 +8,30 @@ RUN apt-get update && apt-get install -y \
     unzip \
     sqlite3 \
     libsqlite3-dev \
+    libmariadb-dev \
     default-mysql-client \
-    libmysqlclient-dev \
-    nodejs \
-    npm
-
-# PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite
+    && docker-php-ext-install pdo pdo_mysql pdo_sqlite \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Workdir
-WORKDIR /var/www/html
+# Node.js 18 (forma correta)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
 
-# Copy project
+WORKDIR /var/www/html
 COPY . .
 
-# Install PHP deps
-RUN composer install --no-dev --optimize-autoloader
-
-# Install Node deps
-RUN npm install && npm run build || true
-
-# Permissions
+# Permissões Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache database
 
-# Expose port
+# Dependências
+RUN composer install --no-dev --optimize-autoloader
+RUN npm install && npm run build
+
 EXPOSE 8000
 
-# Start app
-CMD php artisan key:generate --force && \
-    php artisan migrate --force && \
+CMD php artisan migrate --force || true && \
     php artisan serve --host=0.0.0.0 --port=8000
-
