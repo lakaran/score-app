@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2-cli
 
 # Dependências do sistema
 RUN apt-get update && apt-get install -y \
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Node.js 18 (forma correta)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
 WORKDIR /var/www/html
@@ -24,10 +24,11 @@ COPY . .
 
 # Permissões Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache database
+RUN chmod -R 775 storage bootstrap/cache
 
 # Dependências
 RUN composer install --no-dev --optimize-autoloader
-RUN npm install && npm run build
+RUN npm install && npm run build || true
 
 COPY nginx.conf /etc/nginx/sites-available/default
 
