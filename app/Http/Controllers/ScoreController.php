@@ -9,24 +9,27 @@ use Illuminate\Http\Request;
 
 class ScoreController extends Controller
 {
-public function index()
-{
-$scores = Score::orderByDesc('score')->get();
-return view('scores', compact('scores'));
-}
+    public function index()
+    {
+        $scores = Score::orderByDesc('score')->get();
+        return view('score', compact('scores'));
+    
+    }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+        'name' => 'required|string',
+        'score' => 'required|integer'
+        ]);
 
-public function store(Request $request)
-{
-$request->validate([
-'name' => 'required|string',
-'score' => 'required|integer'
-]);
+        Score::create([
+        'name' => $request->name, 
+        'score' => $request->score 
+        ]);
 
+        return redirect()->back()->with('success', 'Score salvo com sucesso!');
+    
+    }
 
-Score::create($request->only('name', 'score'));
-
-
-return redirect()->back();
-}
 }

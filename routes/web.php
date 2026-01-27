@@ -1,11 +1,8 @@
 <?php
 
 use App\Http\Controllers\ScoreController;
+use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', [ScoreController::class, 'index']);
+// Forçamos a limpeza de qualquer cache anterior definindo a rota explicitamente
+Route::get('/', [ScoreController::class, 'index']); #->name('scores.index');
 Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');
-
-Route::get('/', function () {
-    return 'Laravel está ONLINE 🚀';
-});
