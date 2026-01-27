@@ -29,7 +29,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache database
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
-EXPOSE 8080
+EXPOSE 8000
 
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
 
