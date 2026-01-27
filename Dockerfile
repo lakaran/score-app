@@ -9,10 +9,8 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     libmariadb-dev \
-    default-mysql-client \
-    && docker-php-ext-install pdo pdo_mysql pdo_sqlite \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install pdo pdo_mysql pdo_sqlite 
+  
 
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -33,6 +31,5 @@ RUN npm install && npm run build
 
 EXPOSE 8000
 
-CMD php artisan migrate --force || true && \
-    php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
 
