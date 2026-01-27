@@ -30,7 +30,6 @@ RUN chmod -R 775 storage bootstrap/cache
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build || true
 
-COPY nginx.conf /etc/nginx/sites-available/default
 
 EXPOSE 8080
 
