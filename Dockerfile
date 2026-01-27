@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
 # Dependências do sistema
 RUN apt-get update && apt-get install -y \
@@ -29,7 +29,14 @@ RUN chown -R www-data:www-data storage bootstrap/cache database
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
-EXPOSE 8000
+COPY nginx.conf /etc/nginx/sites-available/default
 
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+EXPOSE 8080
+
+# Limpa caches antigos e garante que as novas rotas sejam lidas
+CMD php artisan config:clear && \
+    php artisan route:clear && \
+    php artisan view:clear && \
+    php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
 
