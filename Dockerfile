@@ -34,5 +34,10 @@ RUN npm install && npm run build || true
 EXPOSE 8080
 
 # Limpa caches antigos e garante que as novas rotas sejam lidas
-CMD php artisan optimize:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD php artisan config:clear && \
+    php artisan route:clear && \
+    php artisan view:clear && \
+    php artisan cache:clear && \
+    php artisan migrate --force && \
+    php -S 0.0.0.0:${PORT:-8080} -t public
 
