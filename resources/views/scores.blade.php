@@ -8,7 +8,7 @@
 <h1>Inserir Pontuação</h1>
 
 
-<form method="POST" action="{{ route('scores.store') }}">
+<form method="POST" action="{{ route('scores.store') }}" autocomplete="off">
 @csrf
 <label>Nome</label><br>
 <input type="text" name="name" required><br><br>
