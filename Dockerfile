@@ -28,7 +28,7 @@ RUN chmod -R 775 storage bootstrap/cache database || true
 RUN composer install --no-dev --optimize-autoloader || true
 
 # Expor a porta que o Render vai usar
-EXPOSE 10000
+EXPOSE 4000
 
 # Comando final
 CMD php artisan serve --host=0.0.0.0 --port=$PORT
