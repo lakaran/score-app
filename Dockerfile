@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     libmariadb-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_sqlite
+    && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql
+
 
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -30,6 +31,6 @@ RUN composer install --no-dev --optimize-autoloader || true
 EXPOSE 4000
 
 # Comando final
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
 
 
