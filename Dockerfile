@@ -9,9 +9,8 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     libmariadb-dev \
+    libpq-dev \
     && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql
-
-
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
